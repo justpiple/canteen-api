@@ -16,6 +16,7 @@ import {
 } from "tsoa";
 import { prisma } from "@/lib/prisma";
 import { toHttpError } from "@/lib/errors";
+import { getCanteenByOwnerId } from "@/utils/canteens";
 import {
   AUTH_ERROR_401,
   AUTH_ERROR_403,
@@ -105,13 +106,7 @@ export class MenusController extends Controller {
       photoUrl = await uploadMenuImage(file.buffer, file.filename);
     }
 
-    const canteen = await prisma.canteen.findFirst({
-      where: { ownerId },
-    });
-
-    if (!canteen) {
-      throw toHttpError(404, "Canteen not found for this owner");
-    }
+    const canteen = await getCanteenByOwnerId(ownerId);
 
     const menu = await prisma.menu.create({
       data: {
@@ -161,13 +156,7 @@ export class MenusController extends Controller {
 
     const data = updateMenuBodySchema.parse(formData);
 
-    const canteen = await prisma.canteen.findFirst({
-      where: { ownerId },
-    });
-
-    if (!canteen) {
-      throw toHttpError(404, "Canteen not found for this owner");
-    }
+    const canteen = await getCanteenByOwnerId(ownerId);
 
     const existingMenu = await prisma.menu.findFirst({
       where: {
@@ -221,13 +210,7 @@ export class MenusController extends Controller {
   ) {
     const ownerId = request.user?.id!;
 
-    const canteen = await prisma.canteen.findFirst({
-      where: { ownerId },
-    });
-
-    if (!canteen) {
-      throw toHttpError(404, "Canteen not found for this owner");
-    }
+    const canteen = await getCanteenByOwnerId(ownerId);
 
     const existingMenu = await prisma.menu.findFirst({
       where: {

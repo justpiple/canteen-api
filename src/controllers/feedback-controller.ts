@@ -14,6 +14,7 @@ import {
 } from "tsoa";
 import { prisma } from "@/lib/prisma";
 import { toHttpError } from "@/lib/errors";
+import { getCanteenByOwnerId } from "@/utils/canteens";
 import {
   createFeedbackBodySchema,
   type CreateFeedbackRequest,
@@ -137,14 +138,7 @@ export class FeedbackController extends Controller {
     let canteenId: string | undefined;
 
     if (user.role === "CANTEEN_OWNER") {
-      const canteen = await prisma.canteen.findFirst({
-        where: { ownerId: user.id },
-      });
-
-      if (!canteen) {
-        throw toHttpError(404, "Canteen not found for this owner");
-      }
-
+      const canteen = await getCanteenByOwnerId(user.id);
       canteenId = canteen.id;
     }
 
@@ -197,13 +191,7 @@ export class FeedbackController extends Controller {
   ): Promise<void> {
     const ownerId = request.user?.id!;
 
-    const canteen = await prisma.canteen.findFirst({
-      where: { ownerId },
-    });
-
-    if (!canteen) {
-      throw toHttpError(404, "Canteen not found for this owner");
-    }
+    const canteen = await getCanteenByOwnerId(ownerId);
 
     const feedback = await prisma.feedback.update({
       where: { id: feedbackId, order: { canteenId: canteen.id } },

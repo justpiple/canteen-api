@@ -12,6 +12,7 @@ import {
 } from "tsoa";
 import { prisma } from "@/lib/prisma";
 import { toHttpError } from "@/lib/errors";
+import { getCanteenByOwnerId, findCanteenByOwnerId } from "@/utils/canteens";
 import type { AuthenticatedRequest } from "@/middlewares/authentication";
 import {
   upsertCanteenBodySchema,
@@ -124,9 +125,7 @@ export class CanteensController extends Controller {
     const data = upsertCanteenBodySchema.parse(body);
     const ownerId = request.user?.id!;
 
-    const existing = await prisma.canteen.findFirst({
-      where: { ownerId },
-    });
+    const existing = await findCanteenByOwnerId(ownerId);
     if (existing) {
       throw toHttpError(400, "Canteen already exists for this owner");
     }
@@ -161,12 +160,7 @@ export class CanteensController extends Controller {
     const data = upsertCanteenBodySchema.parse(body);
     const ownerId = request.user?.id!;
 
-    const existing = await prisma.canteen.findFirst({
-      where: { ownerId },
-    });
-    if (!existing) {
-      throw toHttpError(404, "Canteen not found for this owner");
-    }
+    const existing = await getCanteenByOwnerId(ownerId);
 
     const canteen = await prisma.canteen.update({
       where: { id: existing.id },

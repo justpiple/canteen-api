@@ -15,6 +15,7 @@ import {
 } from "tsoa";
 import { prisma } from "@/lib/prisma";
 import { toHttpError } from "@/lib/errors";
+import { getCanteenByOwnerId } from "@/utils/canteens";
 import {
   createOrderBodySchema,
   listOrdersQuerySchema,
@@ -244,14 +245,7 @@ export class OrdersController extends Controller {
     let canteenId: string | undefined;
 
     if (user.role === "CANTEEN_OWNER") {
-      const canteen = await prisma.canteen.findFirst({
-        where: { ownerId: user.id },
-      });
-
-      if (!canteen) {
-        throw toHttpError(404, "Canteen not found for this owner");
-      }
-
+      const canteen = await getCanteenByOwnerId(user.id);
       canteenId = canteen.id;
     }
 
@@ -322,14 +316,7 @@ export class OrdersController extends Controller {
     let canteenId: string | undefined;
 
     if (user.role === "CANTEEN_OWNER") {
-      const canteen = await prisma.canteen.findFirst({
-        where: { ownerId: user.id },
-      });
-
-      if (!canteen) {
-        throw toHttpError(404, "Canteen not found for this owner");
-      }
-
+      const canteen = await getCanteenByOwnerId(user.id);
       canteenId = canteen.id;
     }
 
@@ -413,13 +400,7 @@ export class OrdersController extends Controller {
     const data = updateOrderStatusBodySchema.parse(body);
     const ownerId = request.user?.id!;
 
-    const canteen = await prisma.canteen.findFirst({
-      where: { ownerId },
-    });
-
-    if (!canteen) {
-      throw toHttpError(404, "Canteen not found for this owner");
-    }
+    const canteen = await getCanteenByOwnerId(ownerId);
 
     const existingOrder = await prisma.order.findFirst({
       where: {
