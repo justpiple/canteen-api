@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
+  Path,
+  Query,
   Request,
   Route,
   Security,
@@ -13,6 +16,10 @@ import { prisma } from "@/lib/prisma";
 import { toHttpError } from "@/lib/errors";
 import {
   createOrderBodySchema,
+  listOrdersQuerySchema,
+  OrderBy,
+  OrderStatus,
+  PaymentStatus,
   type CreateOrderRequest,
 } from "@/schemas/orders";
 import {
@@ -29,6 +36,15 @@ export type OrderItemResponse = {
   priceAtOrder: number;
 };
 
+export type OrderItemDetailResponse = {
+  id: string;
+  menuId: string;
+  menuName: string;
+  menuPhotoUrl: string | null;
+  quantity: number;
+  priceAtOrder: number;
+};
+
 export type OrderResponse = {
   id: string;
   userId: string;
@@ -40,9 +56,42 @@ export type OrderResponse = {
   updatedAt: Date;
 };
 
+export type OrderListResponse = {
+  id: string;
+  canteenId: string;
+  canteenName: string;
+  paymentStatus: string;
+  orderStatus: string;
+  totalAmount: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type OrderDetailResponse = {
+  id: string;
+  userId: string;
+  userName: string;
+  canteenId: string;
+  canteenName: string;
+  paymentStatus: string;
+  orderStatus: string;
+  items: OrderItemDetailResponse[];
+  totalAmount: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type CreateOrderResponse = {
   message: string;
   order: OrderResponse;
+};
+
+export type ListOrdersResponse = {
+  orders: OrderListResponse[];
+};
+
+export type GetOrderDetailResponse = {
+  order: OrderDetailResponse;
 };
 
 @Route("orders")
@@ -160,6 +209,183 @@ export class OrdersController extends Controller {
           quantity: item.quantity,
           priceAtOrder: item.priceAtOrder,
         })),
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+      },
+    };
+  }
+
+  /**
+   * List orders. For USER: returns their own orders. For CANTEEN_OWNER: returns orders to their canteen.
+   */
+  @Get()
+  @Security("bearerAuth", ["USER", "CANTEEN_OWNER"])
+  @Response<AuthenticationErrorResponse>(403, AUTH_ERROR_403)
+  public async listOrders(
+    @Request() request: AuthenticatedRequest,
+    @Query() orderStatus?: OrderStatus,
+    @Query() paymentStatus?: PaymentStatus,
+    @Query() orderBy?: OrderBy
+  ): Promise<ListOrdersResponse> {
+    const user = request.user!;
+    const queryData = listOrdersQuerySchema.parse({
+      orderStatus,
+      paymentStatus,
+      orderBy,
+    });
+
+    let canteenId: string | undefined;
+
+    if (user.role === "CANTEEN_OWNER") {
+      const canteen = await prisma.canteen.findFirst({
+        where: { ownerId: user.id },
+      });
+
+      if (!canteen) {
+        throw toHttpError(404, "Canteen not found for this owner");
+      }
+
+      canteenId = canteen.id;
+    }
+
+    const orders = await prisma.order.findMany({
+      where: {
+        ...(user.role === "USER" ? { userId: user.id } : {}),
+        ...(user.role === "CANTEEN_OWNER" && canteenId ? { canteenId } : {}),
+        ...(queryData.orderStatus
+          ? { orderStatus: queryData.orderStatus }
+          : {}),
+        ...(queryData.paymentStatus
+          ? { paymentStatus: queryData.paymentStatus }
+          : {}),
+      },
+      include: {
+        canteen: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        items: {
+          select: {
+            quantity: true,
+            priceAtOrder: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: queryData.orderBy,
+      },
+    });
+
+    return {
+      orders: orders.map((order) => {
+        const totalAmount = order.items.reduce(
+          (sum: number, item: { quantity: number; priceAtOrder: number }) =>
+            sum + item.priceAtOrder * item.quantity,
+          0
+        );
+
+        return {
+          id: order.id,
+          canteenId: order.canteenId,
+          canteenName: order.canteen.name,
+          paymentStatus: order.paymentStatus,
+          orderStatus: order.orderStatus,
+          totalAmount,
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+        };
+      }),
+    };
+  }
+
+  /**
+   * Get order detail with complete information including order items.
+   */
+  @Get("{orderId}")
+  @Security("bearerAuth", ["USER", "CANTEEN_OWNER"])
+  @Response<AuthenticationErrorResponse>(403, AUTH_ERROR_403)
+  public async getOrderDetail(
+    @Request() request: AuthenticatedRequest,
+    @Path() orderId: string
+  ): Promise<GetOrderDetailResponse> {
+    const user = request.user!;
+
+    let canteenId: string | undefined;
+
+    if (user.role === "CANTEEN_OWNER") {
+      const canteen = await prisma.canteen.findFirst({
+        where: { ownerId: user.id },
+      });
+
+      if (!canteen) {
+        throw toHttpError(404, "Canteen not found for this owner");
+      }
+
+      canteenId = canteen.id;
+    }
+
+    const order = await prisma.order.findFirst({
+      where: {
+        id: orderId,
+        ...(user.role === "USER" ? { userId: user.id } : {}),
+        ...(user.role === "CANTEEN_OWNER" && canteenId ? { canteenId } : {}),
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        canteen: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        items: {
+          include: {
+            menu: {
+              select: {
+                id: true,
+                name: true,
+                photoUrl: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw toHttpError(404, "Order not found");
+    }
+
+    const totalAmount = order.items.reduce(
+      (sum, item) => sum + item.priceAtOrder * item.quantity,
+      0
+    );
+
+    return {
+      order: {
+        id: order.id,
+        userId: order.userId,
+        userName: order.user.name,
+        canteenId: order.canteenId,
+        canteenName: order.canteen.name,
+        paymentStatus: order.paymentStatus,
+        orderStatus: order.orderStatus,
+        items: order.items.map((item) => ({
+          id: item.id,
+          menuId: item.menuId,
+          menuName: item.menu.name,
+          menuPhotoUrl: item.menu.photoUrl,
+          quantity: item.quantity,
+          priceAtOrder: item.priceAtOrder,
+        })),
+        totalAmount,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
       },
