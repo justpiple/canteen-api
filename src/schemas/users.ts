@@ -26,10 +26,7 @@ export const adminUpdateCanteenOwnerBodySchema = z.object({
  *   "phone": "08123456789"
  * }
  */
-export interface UpdateProfileRequest {
-  name?: string;
-  phone?: string | null;
-}
+export type UpdateProfileRequest = z.infer<typeof updateProfileBodySchema>;
 
 /**
  * @example {
@@ -37,10 +34,7 @@ export interface UpdateProfileRequest {
  *   "newPassword": "newpassword123"
  * }
  */
-export interface UpdatePasswordRequest {
-  oldPassword: string;
-  newPassword: string;
-}
+export type UpdatePasswordRequest = z.infer<typeof updatePasswordBodySchema>;
 
 /**
  * @example {
@@ -49,8 +43,6 @@ export interface UpdatePasswordRequest {
  *   "phone": "08123456789"
  * }
  */
-export interface AdminUpdateCanteenOwnerRequest {
-  email?: string;
-  name?: string;
-  phone?: string | null;
-}
+export type AdminUpdateCanteenOwnerRequest = z.infer<
+  typeof adminUpdateCanteenOwnerBodySchema
+>;

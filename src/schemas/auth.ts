@@ -12,29 +12,5 @@ export const loginBodySchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-/**
- * @example {
- *   "email": "user@example.com",
- *   "password": "password123",
- *   "name": "John Doe",
- *   "phone": "08123456789"
- * }
- */
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  name: string;
-  /** Optional */
-  phone?: string;
-}
-
-/**
- * @example {
- *   "email": "user@example.com",
- *   "password": "password123"
- * }
- */
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
+export type RegisterRequest = z.infer<typeof registerBodySchema>;
+export type LoginRequest = z.infer<typeof loginBodySchema>;

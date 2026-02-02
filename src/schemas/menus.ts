@@ -29,18 +29,5 @@ export const updateMenuBodySchema = z.object({
     .optional(),
 });
 
-/**
- * @example {
- *   "name": "Nasi Goreng",
- *   "description": "Nasi goreng enak",
- *   "price": 15000,
- *   "stock": 10
- * }
- * @remarks Photo is now uploaded directly via multipart/form-data file field, not via photoUrl
- */
-export interface UpsertMenuRequest {
-  name: string;
-  description?: string | null;
-  price: number;
-  stock?: number;
-}
+export type CreateMenuRequest = z.infer<typeof createMenuBodySchema>;
+export type UpdateMenuRequest = z.infer<typeof updateMenuBodySchema>;
