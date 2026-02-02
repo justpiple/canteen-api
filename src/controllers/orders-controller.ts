@@ -17,6 +17,7 @@ import {
 } from "@/schemas/orders";
 import {
   AUTH_ERROR_401,
+  AUTH_ERROR_403,
   type AuthenticatedRequest,
   type AuthenticationErrorResponse,
 } from "@/middlewares/authentication";
@@ -55,6 +56,7 @@ export class OrdersController extends Controller {
   @Post()
   @SuccessResponse(201, "Created")
   @Security("bearerAuth", ["USER"])
+  @Response<AuthenticationErrorResponse>(403, AUTH_ERROR_403)
   public async createOrder(
     @Request() request: AuthenticatedRequest,
     @Body() body: CreateOrderRequest
