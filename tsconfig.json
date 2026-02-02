@@ -19,8 +19,13 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@prisma/client": ["./generated/prisma/client"]
+    }
   },
+
   "include": ["src/**/*", "build/routes.ts"],
   "exclude": ["node_modules"]
 }
