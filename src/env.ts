@@ -9,6 +9,7 @@ const envSchema = z.object({
 
   DATABASE_URL: z.url(),
   DATABASE_SCHEMA: z.string().optional(),
+  JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
