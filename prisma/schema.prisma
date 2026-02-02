@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// BCC Canteen - Prisma schema
+// https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client"
@@ -11,4 +8,127 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  USER
+  CANTEEN_OWNER
+  ADMIN
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  CANCELLED
+}
+
+enum OrderStatus {
+  WAITING
+  COOKING
+  READY
+  COMPLETED
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      Role      @default(USER)
+  phone     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  canteen   Canteen?
+  orders    Order[]
+  feedbacks Feedback[]
+
+  @@index([role]) // For filtering users by role
+  @@index([deletedAt]) // For filtering users by deleted at
+}
+
+model Canteen {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner  User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  menus  Menu[]
+  orders Order[]
+}
+
+model Menu {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  price       Int // Rupiah, e.g. 15000 = Rp 15.000
+  photoUrl    String?
+  stock       Int       @default(0)
+  canteenId   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  canteen    Canteen     @relation(fields: [canteenId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([canteenId]) // for filtering menus by canteen
+  @@index([canteenId, deletedAt]) // for filtering menus by canteen and deleted at
+}
+
+model Order {
+  id            String        @id @default(uuid())
+  userId        String
+  canteenId     String
+  paymentStatus PaymentStatus @default(UNPAID)
+  orderStatus   OrderStatus   @default(WAITING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  canteen  Canteen     @relation(fields: [canteenId], references: [id], onDelete: Cascade)
+  items    OrderItem[]
+  feedback Feedback?
+
+  @@index([userId]) // For filtering orders by user
+  @@index([userId, createdAt]) // For filtering orders by user and sort by created at
+  @@index([canteenId]) // For filtering orders by canteen
+  @@index([canteenId, createdAt]) // For filtering orders by canteen and sort by created at
+  @@index([orderStatus]) // For filtering orders by order status
+  @@index([paymentStatus]) // For filtering orders by payment status
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String
+  menuId       String
+  quantity     Int
+  priceAtOrder Int
+  createdAt    DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menu  Menu  @relation(fields: [menuId], references: [id], onDelete: Restrict)
+
+  @@index([orderId]) // For filtering order items by order
+}
+
+model Feedback {
+  id        String    @id @default(uuid())
+  orderId   String    @unique
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId]) // For filtering feedback by user
+  @@index([userId, createdAt]) // For filtering feedback by user and sort by created at
+  @@index([deletedAt]) // For filtering feedback by deleted at
 }
