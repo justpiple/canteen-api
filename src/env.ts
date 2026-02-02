@@ -10,6 +10,14 @@ const envSchema = z.object({
   DATABASE_URL: z.url(),
   DATABASE_SCHEMA: z.string().optional(),
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
+
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  CLOUDINARY_UPLOAD_PRESET: z.string().optional(),
+
+  UPLOAD_DIR: z.string().optional(),
+  UPLOAD_PUBLIC_BASE_PATH: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

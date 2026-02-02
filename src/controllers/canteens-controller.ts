@@ -46,11 +46,6 @@ export type GetCanteenResponse = {
   menus: MenuPublic[];
 };
 
-export type GetCanteenMenusResponse = {
-  canteen: CanteenPublic;
-  menus: MenuPublic[];
-};
-
 @Route("canteens")
 @Tags("Canteens")
 export class CanteensController extends Controller {

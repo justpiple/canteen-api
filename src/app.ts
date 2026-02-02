@@ -4,14 +4,15 @@ import express, {
   urlencoded,
   type Request,
   type Response,
-  NextFunction,
+  type NextFunction,
 } from "express";
+import path from "node:path";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import swaggerUi from "swagger-ui-express";
 import { RegisterRoutes } from "../build/routes";
 import swaggerDocument from "../build/swagger.json";
-import { HttpError } from "@/lib/errors";
+import type { HttpError } from "@/lib/errors";
 
 export const app: Express = express();
 
@@ -19,7 +20,19 @@ app.use(urlencoded({ extended: true }));
 app.use(json());
 app.disable("x-powered-by");
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+const publicUploadsDir =
+  process.env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads");
+
+app.use("/uploads", express.static(publicUploadsDir));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  })
+);
 
 RegisterRoutes(app);
 
