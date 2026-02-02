@@ -1,4 +1,13 @@
-import { Body, Controller, Patch, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Patch,
+  Request,
+  Response,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
 import { toHttpError } from "@/lib/errors";
@@ -8,7 +17,11 @@ import {
   updatePasswordBodySchema,
   type UpdatePasswordRequest,
 } from "@/schemas/users";
-import type { AuthenticatedRequest } from "@/middlewares/authentication";
+import type {
+  AuthenticatedRequest,
+  AuthenticationErrorResponse,
+} from "@/middlewares/authentication";
+import { AUTH_ERROR_401 } from "@/middlewares/authentication";
 
 export type UpdateProfileResponse = {
   message: string;
@@ -27,12 +40,13 @@ export type UpdatePasswordResponse = {
 
 @Route("users")
 @Tags("Users")
+@Security("bearerAuth")
+@Response<AuthenticationErrorResponse>(401, AUTH_ERROR_401)
 export class UsersController extends Controller {
   /**
    * Update current user's profile.
    */
   @Patch("me")
-  @Security("bearerAuth")
   public async updateMe(
     @Request() request: AuthenticatedRequest,
     @Body() body: UpdateProfileRequest
@@ -72,7 +86,6 @@ export class UsersController extends Controller {
    * Update current user's password.
    */
   @Patch("me/password")
-  @Security("bearerAuth")
   public async updateMyPassword(
     @Request() request: AuthenticatedRequest,
     @Body() body: UpdatePasswordRequest

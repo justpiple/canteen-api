@@ -22,12 +22,15 @@ export interface AuthenticatedRequest {
   user?: AuthenticatedUser;
 }
 
-/**
- * TSOA hook used by `@Security()`.
- *
- * - `securityName` must match `tsoa.json` securityDefinitions key
- * - `scopes` is used here as "required roles"
- */
+export type AuthenticationErrorResponse = {
+  message: string;
+};
+
+export const AUTH_ERROR_401 =
+  "Unauthorized - Missing Authorization header, invalid token, or expired token";
+export const AUTH_ERROR_403 =
+  "Forbidden - User does not have required role/permissions";
+
 export async function expressAuthentication(
   request: Request,
   securityName: string,
