@@ -1,6 +1,22 @@
-import { Controller, Get, Path, Route, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { prisma } from "@/lib/prisma";
 import { toHttpError } from "@/lib/errors";
+import type { AuthenticatedRequest } from "@/middlewares/authentication";
+import {
+  upsertCanteenBodySchema,
+  type UpsertCanteenRequest,
+} from "@/schemas/canteens";
 
 export type CanteenPublic = {
   id: string;
@@ -98,6 +114,80 @@ export class CanteensController extends Controller {
         photoUrl: menu.photoUrl,
         stock: menu.stock,
       })),
+    };
+  }
+
+  /**
+   * Create canteen for current canteen owner.
+   */
+  @Post()
+  @Security("bearerAuth", ["CANTEEN_OWNER"])
+  public async createMyCanteen(
+    @Request() request: AuthenticatedRequest,
+    @Body() body: UpsertCanteenRequest
+  ): Promise<{ message: string; canteen: CanteenPublic }> {
+    const data = upsertCanteenBodySchema.parse(body);
+    const ownerId = request.user?.id!;
+
+    const existing = await prisma.canteen.findFirst({
+      where: { ownerId },
+    });
+    if (existing) {
+      throw toHttpError(400, "Canteen already exists for this owner");
+    }
+
+    const canteen = await prisma.canteen.create({
+      data: {
+        ownerId,
+        name: data.name,
+        description: data.description ?? null,
+      },
+    });
+
+    return {
+      message: "Canteen created successfully",
+      canteen: {
+        id: canteen.id,
+        name: canteen.name,
+        description: canteen.description,
+      },
+    };
+  }
+
+  /**
+   * Update current owner's canteen.
+   */
+  @Patch()
+  @Security("bearerAuth", ["CANTEEN_OWNER"])
+  public async updateMyCanteen(
+    @Request() request: AuthenticatedRequest,
+    @Body() body: UpsertCanteenRequest
+  ): Promise<{ message: string; canteen: CanteenPublic }> {
+    const data = upsertCanteenBodySchema.parse(body);
+    const ownerId = request.user?.id!;
+
+    const existing = await prisma.canteen.findFirst({
+      where: { ownerId },
+    });
+    if (!existing) {
+      throw toHttpError(404, "Canteen not found for this owner");
+    }
+
+    const canteen = await prisma.canteen.update({
+      where: { id: existing.id },
+      data: {
+        name: data.name,
+        description: data.description ?? null,
+      },
+    });
+
+    return {
+      message: "Canteen updated successfully",
+      canteen: {
+        id: canteen.id,
+        name: canteen.name,
+        description: canteen.description,
+      },
     };
   }
 }
