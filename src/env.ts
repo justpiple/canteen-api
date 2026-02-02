@@ -18,6 +18,9 @@ const envSchema = z.object({
 
   UPLOAD_DIR: z.string().optional(),
   UPLOAD_PUBLIC_BASE_PATH: z.string().optional(),
+
+  MIDTRANS_SERVER_KEY: z.string().optional(),
+  MIDTRANS_CLIENT_KEY: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

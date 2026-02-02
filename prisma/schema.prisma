@@ -86,6 +86,7 @@ model Order {
   canteenId     String
   paymentStatus PaymentStatus @default(UNPAID)
   orderStatus   OrderStatus   @default(WAITING)
+  paymentLink   String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 

@@ -32,6 +32,7 @@ import {
   type AuthenticatedRequest,
   type AuthenticationErrorResponse,
 } from "@/middlewares/authentication";
+import { snapClient } from "@/lib/midtrans";
 
 export type OrderItemResponse = {
   id: string;
@@ -58,6 +59,7 @@ export type OrderResponse = {
   items: OrderItemResponse[];
   createdAt: Date;
   updatedAt: Date;
+  paymentLink: string | null;
 };
 
 export type OrderListResponse = {
@@ -109,6 +111,7 @@ export type UpdateOrderStatusResponse = {
 export class OrdersController extends Controller {
   /**
    * Create a new order. User can order multiple items from the same canteen.
+   * Use https://simulator.sandbox.midtrans.com/ to test the payment link.
    */
   @Post()
   @SuccessResponse(201, "Created")
@@ -119,7 +122,8 @@ export class OrdersController extends Controller {
     @Body() body: CreateOrderRequest
   ): Promise<CreateOrderResponse> {
     const data = createOrderBodySchema.parse(body);
-    const userId = request.user?.id!;
+    const user = request.user!;
+    const userId = user.id;
 
     const order = await prisma.$transaction(async (tx) => {
       const menuIds = data.items.map((item) => item.menuId);
@@ -188,6 +192,35 @@ export class OrdersController extends Controller {
         },
       });
 
+      const paymentLink = await snapClient?.createTransaction({
+        item_details: menus.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: orderItems.find((o) => o.menuId === item.id)?.quantity!,
+        })),
+        transaction_details: {
+          order_id: newOrder.id,
+          gross_amount: newOrder.items.reduce(
+            (sum, item) => sum + item.priceAtOrder * item.quantity,
+            0
+          ),
+        },
+        customer_details: {
+          email: user.email,
+          phone: user.phone ?? undefined,
+          first_name: user.name,
+        },
+      });
+
+      const paymentLinkUrl = paymentLink?.redirect_url;
+      if (paymentLinkUrl) {
+        await tx.order.update({
+          where: { id: newOrder.id },
+          data: { paymentLink: paymentLinkUrl },
+        });
+      }
+
       for (const item of data.items) {
         await tx.menu.update({
           where: { id: item.menuId },
@@ -199,7 +232,7 @@ export class OrdersController extends Controller {
         });
       }
 
-      return newOrder;
+      return { ...newOrder, paymentLink: paymentLinkUrl };
     });
 
     this.setStatus(201);
@@ -219,6 +252,7 @@ export class OrdersController extends Controller {
         })),
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
+        paymentLink: order.paymentLink ?? null,
       },
     };
   }
@@ -296,6 +330,7 @@ export class OrdersController extends Controller {
           totalAmount,
           createdAt: order.createdAt,
           updatedAt: order.updatedAt,
+          ...(user.role === "USER" ? { paymentLink: order.paymentLink } : {}),
         };
       }),
     };
