@@ -13,6 +13,13 @@
     "specVersion": 3,
     "name": "BCC Canteen API",
     "version": "1.0.0",
+    "securityDefinitions": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "spec": {
       "servers": [{ "url": "http://localhost:3000", "description": "Local" }]
     }
