@@ -6,7 +6,10 @@
     "outputDirectory": "build",
     "specVersion": 3,
     "name": "BCC Canteen API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "spec": {
+      "servers": [{ "url": "http://localhost:3000", "description": "Local" }]
+    }
   },
   "routes": {
     "routesDir": "build"
