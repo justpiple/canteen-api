@@ -12,6 +12,14 @@ export const updatePasswordBodySchema = z.object({
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+export const adminUpdateCanteenOwnerBodySchema = z.object({
+  email: z.email("Invalid email format").optional(),
+  name: z.string().min(1, "Name is required").optional(),
+  phone: z
+    .union([z.string().min(1, "Phone must not be empty"), z.null()])
+    .optional(),
+});
+
 /**
  * @example {
  *   "name": "John Doe",
@@ -32,4 +40,17 @@ export interface UpdateProfileRequest {
 export interface UpdatePasswordRequest {
   oldPassword: string;
   newPassword: string;
+}
+
+/**
+ * @example {
+ *   "email": "owner@example.com",
+ *   "name": "Canteen Owner",
+ *   "phone": "08123456789"
+ * }
+ */
+export interface AdminUpdateCanteenOwnerRequest {
+  email?: string;
+  name?: string;
+  phone?: string | null;
 }
