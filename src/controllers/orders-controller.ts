@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Path,
   Query,
   Request,
@@ -17,10 +18,12 @@ import { toHttpError } from "@/lib/errors";
 import {
   createOrderBodySchema,
   listOrdersQuerySchema,
+  updateOrderStatusBodySchema,
   OrderBy,
   OrderStatus,
   PaymentStatus,
   type CreateOrderRequest,
+  type UpdateOrderStatusRequest,
 } from "@/schemas/orders";
 import {
   AUTH_ERROR_401,
@@ -92,6 +95,10 @@ export type ListOrdersResponse = {
 
 export type GetOrderDetailResponse = {
   order: OrderDetailResponse;
+};
+
+export type UpdateOrderStatusResponse = {
+  message: string;
 };
 
 @Route("orders")
@@ -389,6 +396,51 @@ export class OrdersController extends Controller {
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
       },
+    };
+  }
+
+  /**
+   * Update order status. For Canteen owners only. Can update status to Cooking, Ready, or Completed.
+   */
+  @Patch("{orderId}/status")
+  @Security("bearerAuth", ["CANTEEN_OWNER"])
+  @Response<AuthenticationErrorResponse>(403, AUTH_ERROR_403)
+  public async updateOrderStatus(
+    @Request() request: AuthenticatedRequest,
+    @Path() orderId: string,
+    @Body() body: UpdateOrderStatusRequest
+  ): Promise<UpdateOrderStatusResponse> {
+    const data = updateOrderStatusBodySchema.parse(body);
+    const ownerId = request.user?.id!;
+
+    const canteen = await prisma.canteen.findFirst({
+      where: { ownerId },
+    });
+
+    if (!canteen) {
+      throw toHttpError(404, "Canteen not found for this owner");
+    }
+
+    const existingOrder = await prisma.order.findFirst({
+      where: {
+        id: orderId,
+        canteenId: canteen.id,
+      },
+    });
+
+    if (!existingOrder) {
+      throw toHttpError(404, "Order not found for this canteen");
+    }
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        orderStatus: data.orderStatus,
+      },
+    });
+
+    return {
+      message: "Order status updated successfully",
     };
   }
 }

@@ -21,7 +21,7 @@ export const createOrderBodySchema = z.object({
 export type CreateOrderRequest = z.infer<typeof createOrderBodySchema>;
 
 export type PaymentStatus = "PAID" | "UNPAID" | "CANCELLED";
-export type OrderBy = "ASC" | "DESC";
+export type OrderBy = "asc" | "desc";
 export type OrderStatus = "WAITING" | "COOKING" | "READY" | "COMPLETED";
 
 export const listOrdersQuerySchema = z.object({
@@ -31,3 +31,15 @@ export const listOrdersQuerySchema = z.object({
 });
 
 export type ListOrdersQuery = z.infer<typeof listOrdersQuerySchema>;
+
+export const updateOrderStatusBodySchema = z.object({
+  orderStatus: z
+    .enum(PrismaOrderStatus)
+    .refine((val) => ["COOKING", "READY", "COMPLETED"].includes(val), {
+      message: "Order status must be one of: COOKING, READY, COMPLETED",
+    }),
+});
+
+export type UpdateOrderStatusRequest = z.infer<
+  typeof updateOrderStatusBodySchema
+>;
