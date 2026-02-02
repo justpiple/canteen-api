@@ -22,10 +22,10 @@
     "experimentalDecorators": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@prisma/client": ["./generated/prisma/client"]
+      "@prisma-client": ["./generated/prisma/client"]
     }
   },
 
-  "include": ["src/**/*", "build/routes.ts"],
+  "include": ["src/**/*", "build/routes.ts", "prisma/**/*"],
   "exclude": ["node_modules"]
 }
