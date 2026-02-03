@@ -21,7 +21,13 @@
       }
     },
     "spec": {
-      "servers": [{ "url": "http://localhost:3000", "description": "Local" }]
+      "servers": [
+        { "url": "http://localhost:3000", "description": "Local" },
+        {
+          "url": "https://bcc-canteen.benspace.xyz",
+          "description": "Staging / Preview"
+        }
+      ]
     }
   },
   "routes": {
