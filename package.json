@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsoa spec-and-routes && tsc && tsc-alias -p tsconfig.json",
+    "build": "prisma generate && tsoa spec-and-routes && tsc && tsc-alias -p tsconfig.json",
     "start": "node build/src/server.js",
     "dev": "tsoa spec-and-routes && concurrently \"nodemon\" \"nodemon -x tsoa spec-and-routes\"",
     "test": "echo \"Error: no test specified\" && exit 1"
