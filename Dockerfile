@@ -39,6 +39,8 @@ COPY --from=builder --chown=app:app /app/build ./build
 COPY --from=builder --chown=app:app /app/generated ./generated
 COPY --chown=app:app prisma ./prisma
 
+RUN chown -R app:app /app
+
 USER app
 
 EXPOSE 3000
