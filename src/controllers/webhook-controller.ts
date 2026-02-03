@@ -35,6 +35,7 @@ export class WebhookController extends Controller {
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
+      include: { items: true },
     });
 
     if (!order) {
@@ -63,6 +64,19 @@ export class WebhookController extends Controller {
         where: { id: orderId },
         data: { paymentStatus },
       });
+
+      if (paymentStatus === "CANCELLED") {
+        for (const item of order.items) {
+          await prisma.menu.update({
+            where: { id: item.menuId },
+            data: {
+              stock: {
+                increment: item.quantity,
+              },
+            },
+          });
+        }
+      }
     }
 
     return {
