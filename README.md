@@ -210,6 +210,15 @@ To test payments, use the Midtrans sandbox simulator: [https://simulator.sandbox
 
 A [Dockerfile](Dockerfile) is provided for production.
 
+## Preview
+
+A live preview of the API is available at **[https://bcc-canteen.benspace.xyz/api-docs/](https://bcc-canteen.benspace.xyz/api-docs/)**.
+
+**Admin credentials for testing:**
+
+- Email: `admin@test.com`
+- Password: `Admin123!`
+
 ## **📞** Contact
 
 Have any questions? You can contact [Atha](https://www.instagram.com/mhqif/).
