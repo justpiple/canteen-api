@@ -180,7 +180,21 @@ Save the file when done.
 pnpm install
 ```
 
-### 4. Run the development server
+### 4. Start the database (local development)
+
+For local development, a database can be started using [**start-database.sh**](start-database.sh). The script starts a PostgreSQL container using your `DATABASE_URL` from `.env`. Ensure Docker or Podman is installed and running, then:
+
+```bash
+./start-database.sh
+```
+
+or
+
+```bash
+bash start-database.sh
+```
+
+### 5. Run the development server
 
 ```bash
 pnpm dev
@@ -188,7 +202,7 @@ pnpm dev
 
 **API documentation** is available at **[/api-docs](/api-docs)** (e.g. `http://localhost:3000/api-docs`).
 
-### 5. Payment testing
+### 6. Payment testing
 
 To test payments, use the Midtrans sandbox simulator: [https://simulator.sandbox.midtrans.com/](https://simulator.sandbox.midtrans.com/)
 
