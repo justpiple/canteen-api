@@ -11,6 +11,7 @@ import {
   Tags,
   Path,
   SuccessResponse,
+  Get,
 } from "tsoa";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
@@ -50,6 +51,29 @@ export type UpdatePasswordResponse = {
 @Security("bearerAuth")
 @Response<AuthenticationErrorResponse>(401, AUTH_ERROR_401)
 export class UsersController extends Controller {
+  /**
+   * Get current user's profile.
+   */
+  @Get("me")
+  public async getMyProfile(
+    @Request() request: AuthenticatedRequest
+  ): Promise<UpdateProfileResponse> {
+    const userId = request.user?.id!;
+
+    const user = await prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
+    });
+
+    if (!user) {
+      throw toHttpError(404, "User not found");
+    }
+
+    return {
+      message: "Profile fetched successfully",
+      user,
+    };
+  }
+
   /**
    * Update current user's profile.
    */
@@ -129,6 +153,7 @@ export class UsersController extends Controller {
    */
   @Post()
   @Security("bearerAuth", ["ADMIN"])
+  @Response<AuthenticationErrorResponse>(403, AUTH_ERROR_403)
   @SuccessResponse(201, "Created")
   public async createCanteenOwner(@Body() body: RegisterRequest): Promise<{
     message: string;
@@ -178,6 +203,7 @@ export class UsersController extends Controller {
    */
   @Patch("{userId}")
   @Security("bearerAuth", ["ADMIN"])
+  @Response<AuthenticationErrorResponse>(403, AUTH_ERROR_403)
   public async updateCanteenOwner(
     @Path() userId: string,
     @Body() body: AdminUpdateCanteenOwnerRequest
