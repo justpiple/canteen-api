@@ -13,6 +13,7 @@ import swaggerUi from "swagger-ui-express";
 import { RegisterRoutes } from "../build/routes";
 import swaggerDocument from "../build/swagger.json";
 import type { HttpError } from "@/lib/errors";
+import { env } from "./env";
 
 export const app: Express = express();
 
@@ -42,7 +43,7 @@ app.use((_req: Request, res: Response) => {
   });
 });
 
-app.use((err: HttpError, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof ZodError) {
     const validationError = fromZodError(err);
     const errors: Record<string, string> = {};
@@ -58,8 +59,11 @@ app.use((err: HttpError, _req: Request, res: Response, _next: NextFunction) => {
     });
   }
 
-  const status = err.statusCode ?? 500;
-  const message = err.message ?? "Internal server error";
+  const status = (err as HttpError).statusCode;
+  const message =
+    status || env.NODE_ENV === "development"
+      ? err.message
+      : "Internal server error";
 
-  return res.status(status).json({ message });
+  return res.status(status ?? 500).json({ message });
 });
