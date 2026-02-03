@@ -62,6 +62,13 @@ export class UsersController extends Controller {
 
     const user = await prisma.user.findFirst({
       where: { id: userId, deletedAt: null },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+      },
     });
 
     if (!user) {
