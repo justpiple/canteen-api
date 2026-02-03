@@ -1,6 +1,6 @@
 FROM node:22-alpine AS base
 
-RUN corepack enable && corepack prepare pnpm --activate
+RUN corepack enable && corepack prepare pnpm@10.10.0 --activate
 WORKDIR /app
 
 # Dependencies
@@ -15,12 +15,13 @@ RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
 
+COPY package.json pnpm-lock.yaml ./
 COPY --from=deps /app/node_modules ./node_modules
 COPY prisma ./prisma/
 COPY tsconfig.json tsoa.json prisma.config.ts ./
 COPY src ./src/
 
-RUN pnpm prisma generate && pnpm build
+RUN pnpm build
 
 # Runner
 
