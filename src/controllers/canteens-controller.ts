@@ -38,6 +38,7 @@ export type ListCanteensResponse = {
   canteens: Array<
     CanteenPublic & {
       menusCount: number;
+      avgRating: number | null;
     }
   >;
 };
@@ -55,15 +56,28 @@ export class CanteensController extends Controller {
    */
   @Get()
   public async listCanteens(): Promise<ListCanteensResponse> {
-    const canteens = await prisma.canteen.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        menus: {
-          where: { deletedAt: null },
-          select: { id: true },
+    const [canteens, avgRatingsRows] = await Promise.all([
+      prisma.canteen.findMany({
+        orderBy: { name: "asc" },
+        include: {
+          menus: {
+            where: { deletedAt: null },
+            select: { id: true },
+          },
         },
-      },
-    });
+      }),
+      prisma.$queryRaw<Array<{ canteenId: string; avgRating: number }>>`
+        SELECT o."canteenId", ROUND(AVG(f.rating)::numeric, 1)::double precision as "avgRating"
+        FROM "Feedback" f
+        INNER JOIN "Order" o ON o.id = f."orderId"
+        WHERE f."deletedAt" IS NULL
+        GROUP BY o."canteenId"
+      `,
+    ]);
+
+    const avgRatingByCanteenId = new Map(
+      avgRatingsRows.map((r) => [r.canteenId, r.avgRating])
+    );
 
     return {
       canteens: canteens.map((canteen) => ({
@@ -71,6 +85,7 @@ export class CanteensController extends Controller {
         name: canteen.name,
         description: canteen.description,
         menusCount: canteen.menus.length,
+        avgRating: avgRatingByCanteenId.get(canteen.id) ?? null,
       })),
     };
   }
