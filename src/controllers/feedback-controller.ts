@@ -193,14 +193,14 @@ export class FeedbackController extends Controller {
 
     const canteen = await getCanteenByOwnerId(ownerId);
 
-    const feedback = await prisma.feedback.update({
+    const feedback = await prisma.feedback.updateMany({
       where: { id: feedbackId, order: { canteenId: canteen.id } },
       data: {
         deletedAt: new Date(),
       },
     });
 
-    if (!feedback) {
+    if (feedback.count === 0) {
       throw toHttpError(404, "Feedback not found");
     }
 
