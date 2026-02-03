@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+
+# Build output (rebuilt in image)
+build
+generated
+
+# Git and IDE
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+
+# Env (inject at runtime)
+.env
+.env.*
+!.env.example
+
+# Docs and dev
+*.md
+!README.md
+.prettierrc
+nodemon.json
+CONTRIBUTING.md
+CONVENTION.md
+
+# Tests and misc
+*.log
+coverage
+.nyc_output
+*.tsbuildinfo
