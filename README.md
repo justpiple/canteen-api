@@ -16,6 +16,7 @@ To address this need, we introduce BCC Canteen, a digital platform designed to t
 ## **⭐** Minimum Viable Product (MVP)
 
 As the initial development phase of BCC Canteen, the system must support the following minimum features:
+
 - New users can register an account ✔️
 - Users can log in to the system ✔️
 - Users can edit their profile information ✔️
@@ -139,7 +140,7 @@ You might be overwhelmed by these requirements. Don't worry, here's a list of so
 > 3. PHP
 > 4. Java
 
-You are welcome to use any libraries or frameworks, but we appreciate it if you use the popular ones. 
+You are welcome to use any libraries or frameworks, but we appreciate it if you use the popular ones.
 
 ## **🎒** Tasks
 
@@ -154,17 +155,57 @@ The implementation of this project MUST be in the form of a REST, gRPC, or Graph
 
 ## **🧪** API Installation
 
-> Write how to run your service in a local or development environment here. If you use Docker to serve your DBMS or your server, you will receive bonus points for your submission.
+How to run the API in a local:
+
+### 1. Copy the environment file
+
+Copy [`.env.example`](.env.example) to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+### 2. Configure environment variables
+
+Edit `.env` and:
+
+- **Set** the values you need (e.g. `DATABASE_URL`, `JWT_SECRET`, `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`).
+- **Remove** any variables you do not use.
+
+Save the file when done.
+
+### 3. Install dependencies
+
+```bash
+pnpm install
+```
+
+### 4. Run the development server
+
+```bash
+pnpm dev
+```
+
+**API documentation** is available at **[/api-docs](/api-docs)** (e.g. `http://localhost:3000/api-docs`).
+
+### 5. Payment testing
+
+To test payments, use the Midtrans sandbox simulator: [https://simulator.sandbox.midtrans.com/](https://simulator.sandbox.midtrans.com/)
+
+### Production
+
+A [Dockerfile](Dockerfile) is provided for production.
 
 ## **📞** Contact
 
 Have any questions? You can contact [Atha](https://www.instagram.com/mhqif/).
+
 ## **🎁** Submission
 
 Please follow the instructions on the [Contributing guide](CONTRIBUTING.md).
 
 ![cheers](https:
+
 > This is not the only way to join us.
 >
 > **But, this is the _one and only way_ to instantly pass.**
-
