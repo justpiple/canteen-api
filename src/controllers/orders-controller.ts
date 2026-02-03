@@ -33,6 +33,7 @@ import {
   type AuthenticationErrorResponse,
 } from "@/middlewares/authentication";
 import { snapClient } from "@/lib/midtrans";
+import { PaymentStatus as PrismaPaymentStatus } from "generated/prisma/enums";
 
 export type OrderItemResponse = {
   id: string;
@@ -446,6 +447,10 @@ export class OrdersController extends Controller {
 
     if (!existingOrder) {
       throw toHttpError(404, "Order not found for this canteen");
+    }
+
+    if (existingOrder.paymentStatus !== PrismaPaymentStatus.PAID) {
+      throw toHttpError(400, "Payment for this order is not completed");
     }
 
     await prisma.order.update({
