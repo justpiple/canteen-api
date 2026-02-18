@@ -1,20 +1,3 @@
-# BCC Canteen
-
-### ⚠️⚠️⚠️
-
-```
-Submissions from 2025 students will have much higher priority than submissions from 2024, SAP, or higher students.
-Please take note of this before planning to attempt this freepass challenge.
-```
-
-## 💌 Invitation Letter
-
-As campus life continues to evolve, the need for a fast, transparent, and efficient canteen service becomes increasingly important. We recognize that both customers and canteen operators require a system that simplifies food ordering, payment processing, menu management, and administrative control.
-
-To address this need, we introduce BCC Canteen, a digital platform designed to transform how campus canteens operate. This system aims to provide a seamless food ordering and payment experience for users, efficient menu and order management for canteen owners, and centralized supervision for administrators.
-
-## **⭐** Minimum Viable Product (MVP)
-
 As the initial development phase of BCC Canteen, the system must support the following minimum features:
 
 - New users can register an account ✔️
@@ -110,50 +93,7 @@ WHEN  => I remove a user or canteen owner
 THEN  => The system will delete the account from the system
 ```
 
-## **👪** Entities and Actors
-
-We want to see your perspective about these problems. You can define various types of entities or actors. One thing for sure, there is no true or false statement to define the entities. As long as the results are understandable, then go for it! 🚀
-
-## **📘** References
-
-You might be overwhelmed by these requirements. Don't worry, here's a list of some tools that you could use (it's not required to use all of them nor any of them):
-
-1. [Example Project](https://github.com/meong1234/fintech)
-2. [Git](https://try.github.io/)
-3. [Cheatsheets](https://devhints.io/)
-4. [REST API](https://restfulapi.net/)
-5. [Insomnia REST Client](https://insomnia.rest/)
-6. [Test-Driven Development](https://www.freecodecamp.org/news/test-driven-development-what-it-is-and-what-it-is-not-41fa6bca02a2/)
-7. [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-8. [GraphQL](https://graphql.org/)
-9. [gRPC](https://grpc.io/)
-10. [Docker Compose](https://docs.docker.com/compose/install/)
-
-## **🔪** Accepted Weapons
-
-> BEFORE CHOOSING YOUR LANGUAGE, PLEASE VISIT OUR [CONVENTION](CONVENTION.md) ON THIS PROJECT
->
-> **Any code that did not follow the convention will be rejected!**
->
-> 1. Golang (preferred)
-> 2. NodeJS
-> 3. PHP
-> 4. Java
-
-You are welcome to use any libraries or frameworks, but we appreciate it if you use the popular ones.
-
-## **🎒** Tasks
-
-```
-The implementation of this project MUST be in the form of a REST, gRPC, or GraphQL API (choose AT LEAST one type).
-```
-
-1. Fork this repository
-2. Follow the project convention
-3. Finish all service implementations
-4. Write the installation guide of your back-end service in the section below
-
-## **🧪** API Installation
+## **🧪** Installation
 
 How to run the API in a local:
 
@@ -218,17 +158,3 @@ A live preview of the API is available at **[https://bcc-canteen.benspace.xyz/ap
 
 - Email: `admin@test.com`
 - Password: `Admin123!`
-
-## **📞** Contact
-
-Have any questions? You can contact [Atha](https://www.instagram.com/mhqif/).
-
-## **🎁** Submission
-
-Please follow the instructions on the [Contributing guide](CONTRIBUTING.md).
-
-![cheers](https:
-
-> This is not the only way to join us.
->
-> **But, this is the _one and only way_ to instantly pass.**
