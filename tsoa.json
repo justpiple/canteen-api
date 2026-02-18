@@ -1,0 +1,37 @@
+{
+  "entryFile": "src/app.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/**/*controller.ts"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "spec": {
+    "outputDirectory": "build",
+    "specVersion": 3,
+    "name": "BCC Canteen API",
+    "version": "1.0.0",
+    "securityDefinitions": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "spec": {
+      "servers": [
+        { "url": "http://localhost:3000", "description": "Local" },
+        {
+          "url": "https://bcc-canteen.benspace.xyz",
+          "description": "Staging / Preview"
+        }
+      ]
+    }
+  },
+  "routes": {
+    "routesDir": "build",
+    "authenticationModule": "src/middlewares/authentication.ts"
+  }
+}
